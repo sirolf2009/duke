@@ -1,24 +1,21 @@
 package com.sirolf2009.duke.core
 
 import com.sirolf2009.duke.core.allocation.DataFileAllocation
-import java.util.Arrays
-import java.util.stream.Stream
-import org.reflections.Reflections
+import java.util.List
 import org.eclipse.xtend.lib.annotations.Accessors
+import org.reflections.Reflections
 
 @Accessors
 public class Duke implements AutoCloseable {
 
 	String databaseLocation;
 	DataFileAllocation fileAllocation;
-//	List<Class<?>> registeredClasses;
 	String packagePrefix;
 	Connection connection;
 
 	new(String databaseLocation, String packagePrefix) {
 		this.databaseLocation = databaseLocation
 		fileAllocation = new DataFileAllocation(databaseLocation)
-//		registeredClasses = getRegisterable(packagePrefix).collect(Collectors.toList()) as List<Class<?>>
 		connection = Connection.getInstance(this)
 	}
 
@@ -73,14 +70,14 @@ public class Duke implements AutoCloseable {
 
 	def getRegisterable(String packagePrefix) {
 		val entities = new Reflections(packagePrefix).getTypesAnnotatedWith(DBEntity)
-		return entities.stream().flatMap[this.getRegisterable(it)]
+		return entities.map[this.getRegisterable(it)].flatten.toList
 	}
 
-	def Stream<Class<?>> getRegisterable(Class<?> clazz) {
+	def List<Class<?>> getRegisterable(Class<?> clazz) {
 		if(Object.isAssignableFrom(clazz)) {
-			return Arrays.stream(clazz.getDeclaredFields()).flatMap[getRegisterable(it.type)]
+			return clazz.getDeclaredFields().map[getRegisterable(it.type)].flatten.toList
 		}
-		return newArrayList().stream
+		return newArrayList()
 	}
 
 }

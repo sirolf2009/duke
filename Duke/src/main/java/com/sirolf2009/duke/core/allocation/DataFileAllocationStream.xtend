@@ -7,9 +7,9 @@ import java.io.File
 import java.lang.reflect.Method
 import java.util.HashMap
 import java.util.Map
-import java.util.function.Function
 import org.reflections.Reflections
 import org.reflections.scanners.FieldAnnotationsScanner
+import com.google.common.base.Function
 
 class DataFileAllocationStream implements AutoCloseable {
 
@@ -70,7 +70,7 @@ class DataFileAllocationStream implements AutoCloseable {
 	}
 
 	def Function<Object, Object> getIDProducer() {
-		val IDField = new Reflections(clazz, new FieldAnnotationsScanner()).getFieldsAnnotatedWith(ID).stream().findAny().orElseThrow[new RuntimeException("No ID field found for class "+clazz)]
+		val IDField = new Reflections(clazz, new FieldAnnotationsScanner()).getFieldsAnnotatedWith(ID).get(0)//.orElseThrow[new RuntimeException("No ID field found for class "+clazz)]
 		if(IDField.isAccessible()) {
 			return [return IDField.get]
 		} else {

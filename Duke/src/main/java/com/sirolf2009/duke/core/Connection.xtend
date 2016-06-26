@@ -1,29 +1,31 @@
 package com.sirolf2009.duke.core
 
 import com.esotericsoftware.kryo.Kryo
+import com.google.common.base.Function
 import java.util.ArrayList
 import java.util.LinkedList
 import java.util.List
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
-import java.util.function.Function
+import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
+import org.objenesis.strategy.StdInstantiatorStrategy
 import org.reflections.Reflections
 
 public class Connection implements Runnable {
 
-	static Connection instance;
-	Kryo kryo;
+	static Connection instance
+	@Accessors Kryo kryo
 	Duke database
-	@SuppressWarnings("rawtypes")
-	LinkedList<MethodRequest<?>> callbacks;
+	LinkedList<MethodRequest<?>> callbacks
 
 	new(Duke database) {
 		this.database = database
 	}
 
 	override void run() {
-		kryo = new Kryo()
+		kryo = new Kryo() 
+		kryo.setInstantiatorStrategy(new StdInstantiatorStrategy())
 		getRegisterable(database.getPackagePrefix()).forEach[kryo.register(it)]
 		callbacks = new LinkedList()
 		while(true) {

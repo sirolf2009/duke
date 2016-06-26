@@ -1,24 +1,23 @@
 package com.sirolf2009.duke.core
 
-import java.util.Arrays
-import java.util.stream.Stream
+import java.util.List
 import org.reflections.Reflections
 
 class Register {
 
-	def register(Stream<Class<?>> classes) {
+	def register(List<Class<?>> classes) {
 	}
 	
 	def getRegisterable(String packagePrefix) {
 		val entities = new Reflections(packagePrefix).getTypesAnnotatedWith(DBEntity)
-		return entities.stream().flatMap[this.getRegisterable(it)]
+		return entities.map[this.getRegisterable(it)].flatten
 	}
 
-	def Stream<Class<?>> getRegisterable(Class<?> clazz) {
+	def List<Class<?>> getRegisterable(Class<?> clazz) {
 		if(Object.isAssignableFrom(clazz)) {
-			return Arrays.stream(clazz.getDeclaredFields()).flatMap[getRegisterable(it.type)]
+			return clazz.getDeclaredFields().map[getRegisterable(it.type)].flatten.toList
 		}
-		return newArrayList().stream
+		return newArrayList()
 	}
 	
 }
