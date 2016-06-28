@@ -2,6 +2,7 @@ package com.sirolf2009.duke.core.allocation
 
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
+import com.google.common.base.Function
 import com.sirolf2009.duke.core.ID
 import java.io.File
 import java.lang.reflect.Method
@@ -9,7 +10,7 @@ import java.util.HashMap
 import java.util.Map
 import org.reflections.Reflections
 import org.reflections.scanners.FieldAnnotationsScanner
-import com.google.common.base.Function
+import org.reflections.util.ClasspathHelper
 
 class DataFileAllocationStream implements AutoCloseable {
 
@@ -70,7 +71,10 @@ class DataFileAllocationStream implements AutoCloseable {
 	}
 
 	def Function<Object, Object> getIDProducer() {
-		val IDField = new Reflections(clazz, new FieldAnnotationsScanner()).getFieldsAnnotatedWith(ID).get(0)//.orElseThrow[new RuntimeException("No ID field found for class "+clazz)]
+		val reflections = new Reflections(ClasspathHelper.forClass(clazz), new FieldAnnotationsScanner()).getFieldsAnnotatedWith(ID)
+		val IDField = reflections.findFirst[
+			it.declaringClass.equals(clazz)
+		]
 		if(IDField.isAccessible()) {
 			return [return IDField.get]
 		} else {

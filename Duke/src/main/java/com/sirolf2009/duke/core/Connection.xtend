@@ -11,6 +11,7 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
 import org.objenesis.strategy.StdInstantiatorStrategy
 import org.reflections.Reflections
+import com.esotericsoftware.kryo.Kryo.DefaultInstantiatorStrategy
 
 public class Connection implements Runnable {
 
@@ -21,30 +22,30 @@ public class Connection implements Runnable {
 
 	new(Duke database) {
 		this.database = database
+		callbacks = new LinkedList()
 	}
 
 	override void run() {
 		kryo = new Kryo() 
-		kryo.setInstantiatorStrategy(new StdInstantiatorStrategy())
+		(kryo.getInstantiatorStrategy() as DefaultInstantiatorStrategy).setFallbackInstantiatorStrategy(new StdInstantiatorStrategy())
 		getRegisterable(database.getPackagePrefix()).forEach[kryo.register(it)]
-		callbacks = new LinkedList()
 		while(true) {
 			synchronized(this) {
 				while(callbacks.isEmpty()) {
 					try {
-						this.wait();
+						this.wait()
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						e.printStackTrace()
 					}
 				}
 				for(MethodRequest<?> method : callbacks) {
 					try {
-						method.result.add(method.function.apply(kryo));
+						method.result.add(method.function.apply(kryo))
 					} catch(Exception e) {
-						e.printStackTrace();
+						e.printStackTrace()
 					}
 				}
-				callbacks.clear();
+				callbacks.clear()
 			}
 		}
 	}
@@ -70,13 +71,6 @@ public class Connection implements Runnable {
 		return register
 	}
 
-//	def List<Class<?>> getRegisterable(Class<?> clazz, List<Class<?>> register) {
-//		if(Object.isAssignableFrom(clazz)) {
-	//		return Arrays.stream(clazz.getDeclaredFields()).map[getRegisterable(it.type)].collect(Collectors.toList())
-//		}
-//		return newArrayList()
-//	}
-	
 	def void getRegisterable(Class<?> clazz, List<Class<?>> register) {
 		if(Object.isAssignableFrom(clazz) && !register.contains(clazz)) {
 			register.add(clazz)
@@ -94,8 +88,8 @@ public class Connection implements Runnable {
 
 	@Data static class MethodRequest<R> {
 
-		private BlockingQueue<Object> result;
-		private Function<Kryo, R> function;
+		BlockingQueue<Object> result
+		Function<Kryo, R> function
 
 	}
 
