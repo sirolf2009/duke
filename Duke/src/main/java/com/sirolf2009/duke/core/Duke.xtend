@@ -27,16 +27,16 @@ public class Duke implements AutoCloseable {
 	def create(Object object) {
 		val error = connection.execute[
 			try {
-			val out = fileAllocation.getOutput(object)
-			writeObject(out, object)
-			out.close()
-			return null
+				val out = fileAllocation.getOutput(object)
+				writeObject(out, object)
+				out.close()
+				return true
 			} catch(Exception e) {
 				return e
 			}
 		]
-		if(error != null) {
-			throw new CreationException("Failed to create object", error)
+		if(error != null && error instanceof Throwable) {
+			throw new CreationException("Failed to create object", error as Throwable)
 		}
 	}
 
