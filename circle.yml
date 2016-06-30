@@ -1,0 +1,11 @@
+machine:
+  java:
+    version: oraclejdk8
+
+test:
+  override:
+    - mvn  -f Duke/pom.xml clean install
+    - mvn  -f duke-test/pom.xml clean install
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
