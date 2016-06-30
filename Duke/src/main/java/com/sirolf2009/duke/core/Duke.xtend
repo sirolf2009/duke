@@ -1,6 +1,7 @@
 package com.sirolf2009.duke.core
 
 import com.sirolf2009.duke.core.allocation.DataFileAllocation
+import com.sirolf2009.duke.core.exception.CreationException
 import java.util.List
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.reflections.Reflections
@@ -24,12 +25,19 @@ public class Duke implements AutoCloseable {
 	}
 
 	def create(Object object) {
-		connection.execute[
-			val out = fileAllocation.getOutput(object);
-			writeObject(out, object);
-			out.close();
-			return true;
-		];
+		val error = connection.execute[
+			try {
+			val out = fileAllocation.getOutput(object)
+			writeObject(out, object)
+			out.close()
+			return null
+			} catch(Exception e) {
+				return e
+			}
+		]
+		if(error != null) {
+			throw new CreationException("Failed to create object", error)
+		}
 	}
 
 	def <T> T read(Object ID, Class<T> type) {

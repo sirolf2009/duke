@@ -21,3 +21,6 @@
 /ID.java
 /Register.java
 /Serializer.java
+/.RegistryException.java._trace
+/.MissingIDException.java._trace
+/.CreationException.java._trace

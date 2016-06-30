@@ -4,6 +4,7 @@ import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import com.google.common.base.Function
 import com.sirolf2009.duke.core.ID
+import com.sirolf2009.duke.core.exception.MissingIDException
 import java.io.File
 import java.lang.reflect.Method
 import java.util.HashMap
@@ -75,6 +76,9 @@ class DataFileAllocationStream implements AutoCloseable {
 		val IDField = reflections.findFirst[
 			it.declaringClass.equals(clazz)
 		]
+		if(IDField == null) {
+			throw new MissingIDException(clazz)
+		}
 		if(IDField.isAccessible()) {
 			return [return IDField.get]
 		} else {
