@@ -1,5 +1,7 @@
 ![](http://i.imgur.com/w1EY0s8.png)
 
+[![CircleCI](https://circleci.com/gh/sirolf2009/duke.svg?style=svg)](https://circleci.com/gh/sirolf2009/duke)
+
 Duke is a database built using kryo. In short, it recursively registers POJO's by using annotations and saves them to files.
 
 It's built using Eclipse XTend, which is translated into java 5 code. So even if you don't use xtend, you can still use this library
