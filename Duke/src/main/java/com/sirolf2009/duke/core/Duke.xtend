@@ -23,9 +23,13 @@ public class Duke implements AutoCloseable {
 	def void save(Object object) {
 		create(object)
 	}
+	
+	def void saveAll(Object[] object) {
+		object.forEach[create]
+	}
 
 	def create(Object object) {
-		val error = connection.execute[
+		val error = connection.execute [
 			try {
 				val out = fileAllocation.getOutput(object)
 				writeObject(out, object)
@@ -42,7 +46,7 @@ public class Duke implements AutoCloseable {
 
 	def <T> T read(Object ID, Class<T> type) {
 		if(exists(ID, type)) {
-			return connection.execute[
+			return connection.execute [
 				val input = fileAllocation.getInput(ID, type);
 				val object = readObject(input, type);
 				input.close();
@@ -50,6 +54,17 @@ public class Duke implements AutoCloseable {
 			]
 		}
 		return null;
+	}
+
+	def <T> List<T> all(Class<T> type) {
+		return connection.execute [conn|
+			val files = fileAllocation.files
+			return files.map[fileAllocation.getInput(name, type)].map[
+				val object = conn.readObject(it, type)
+				it.close
+				return object
+			].toList
+		]
 	}
 
 	def update(Object object) {

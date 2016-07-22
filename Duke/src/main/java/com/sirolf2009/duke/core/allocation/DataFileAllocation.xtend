@@ -1,5 +1,6 @@
 package com.sirolf2009.duke.core.allocation
 
+import java.io.File
 import java.util.HashMap
 import java.util.Map
 
@@ -42,6 +43,10 @@ class DataFileAllocation implements AutoCloseable {
 			cache.put(clazz, new DataFileAllocationStream(location+"/"+clazz.getSimpleName(), clazz));
 		}
 		return cache.get(clazz);
+	}
+	
+	def files() {
+		new File(location).listFiles
 	}
 
 	override void close() throws Exception {
