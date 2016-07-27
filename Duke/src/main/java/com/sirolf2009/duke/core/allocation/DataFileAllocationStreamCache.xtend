@@ -23,6 +23,7 @@ class DataFileAllocationStreamCache implements AutoCloseable {
 	def getOutput() {
 		try {
 			close()
+			getFile().parentFile.mkdirs()
 			getFile().createNewFile()
 			output = new UnsafeOutput(new FileOutputStream(new File(location)))
 			return output;
@@ -35,6 +36,7 @@ class DataFileAllocationStreamCache implements AutoCloseable {
 	def getInput() {
 		try {
 			close();
+			getFile().parentFile.mkdirs()
 			getFile().createNewFile();
 			input = new UnsafeInput(new FileInputStream(new File(location)));
 			return input;
