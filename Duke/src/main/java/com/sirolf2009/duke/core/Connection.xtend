@@ -1,8 +1,14 @@
 package com.sirolf2009.duke.core
 
 import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.Kryo.DefaultInstantiatorStrategy
+import com.esotericsoftware.kryo.io.Input
+import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.google.common.base.Function
+import com.sirolf2009.duke.core.Connection.MethodRequest
 import java.util.ArrayList
+import java.util.Arrays
+import java.util.Collection
 import java.util.LinkedList
 import java.util.List
 import java.util.concurrent.ArrayBlockingQueue
@@ -11,7 +17,6 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
 import org.objenesis.strategy.StdInstantiatorStrategy
 import org.reflections.Reflections
-import com.esotericsoftware.kryo.Kryo.DefaultInstantiatorStrategy
 
 public class Connection implements Runnable {
 
@@ -26,19 +31,25 @@ public class Connection implements Runnable {
 	}
 
 	override void run() {
-		kryo = new Kryo() 
+		kryo = new Kryo()
 		(kryo.getInstantiatorStrategy() as DefaultInstantiatorStrategy).setFallbackInstantiatorStrategy(new StdInstantiatorStrategy())
+		kryo.register(Arrays.asList().getClass(), new CollectionSerializer() {
+			override Collection create(Kryo kryo, Input input, Class<Collection> type) {
+				return new ArrayList()
+			}
+		});
 		getRegisterable(database.getPackagePrefix()).forEach[kryo.register(it)]
 		while(true) {
+
 			synchronized(this) {
 				while(callbacks.isEmpty()) {
 					try {
 						this.wait()
-					} catch (InterruptedException e) {
+					} catch(InterruptedException e) {
 						e.printStackTrace()
 					}
 				}
-				for(MethodRequest<?> method : callbacks) {
+				for (MethodRequest<?> method : callbacks) {
 					try {
 						method.result.add(method.function.apply(kryo))
 					} catch(Exception e) {
@@ -52,13 +63,14 @@ public class Connection implements Runnable {
 
 	def <R> R execute(Function<Kryo, R> function) {
 		val queue = new ArrayBlockingQueue<R>(1);
+
 		synchronized(this) {
 			callbacks.add(new MethodRequest(queue as BlockingQueue<Object>, function));
 			this.notifyAll();
 		}
 		try {
 			return queue.take();
-		} catch (InterruptedException e) {
+		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
 		return null;

@@ -9,10 +9,10 @@ import org.reflections.Reflections
 @Accessors
 public class Duke implements AutoCloseable {
 
-	String databaseLocation;
-	DataFileAllocation fileAllocation;
-	String packagePrefix;
-	Connection connection;
+	String databaseLocation
+	DataFileAllocation fileAllocation
+	String packagePrefix
+	Connection connection
 
 	new(String databaseLocation, String packagePrefix) {
 		this.databaseLocation = databaseLocation
